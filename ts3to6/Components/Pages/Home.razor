@@ -1,0 +1,165 @@
+@page "/"
+@rendermode InteractiveServer
+<PageTitle>TS3 to TS6 Database Converter — Migrate ts3server.sqlitedb to TeamSpeak 6</PageTitle>
+
+<div class="app-container">
+    @* ═══════════════════════════════════════════════ LOGO GLOBAL ═══ *@
+    <div class="global-header">
+        <div class="global-logo">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="6" width="20" height="26" rx="2" stroke="currentColor" stroke-width="2" />
+                <path d="M7 12h12M7 17h12M7 22h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M30 28 L38 20 L46 28" stroke="var(--accent, #5865F2)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M38 20 V40" stroke="var(--accent, #5865F2)" stroke-width="3" stroke-linecap="round" />
+            </svg>
+        </div>
+        <span class="global-brand">TS3 <span class="brand-arrow">→</span> TS6</span>
+    </div>
+
+    @* ═══════════════════════════════════════════════ UPLOAD ═══ *@
+    @if (!_converting && _result is null)
+    {
+        <div class="page-center">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h1 class="card-title">Database Converter</h1>
+                        <p class="card-sub">Migrate your local ts3server.sqlitedb file</p>
+                    </div>
+                </div>
+
+                <div class="drop-zone-wrapper"
+                     @ondragenter="OnDragEnter"
+                     @ondragleave="OnDragLeave"
+                     @ondragover:preventDefault>
+                    <label class="drop-zone @(_dragOver ? "drop-zone--over" : "")" for="file-input">
+                        <svg class="dz-icon" viewBox="0 0 48 48" fill="none">
+                            <rect x="8" y="4" width="26" height="36" rx="3" stroke="currentColor" stroke-width="1.5" />
+                            <path d="M26 4 L34 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                            <rect x="26" y="4" width="8" height="8" rx="1" fill="currentColor" opacity="0.15" />
+                            <path d="M14 22h20M14 28h16M14 34h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                        </svg>
+                        <span class="dz-title">
+                            @(_dragOver ? "Drop it here" : "ts3server.sqlitedb")
+                        </span>
+                        <span class="dz-sub">Drag & drop or click to browse</span>
+                    </label>
+                    <InputFile id="file-input" class="file-hidden"
+                               OnChange="OnFileSelected"
+                               accept=".sqlitedb,.db,.sqlite" />
+                </div>
+
+                @if (!string.IsNullOrEmpty(DbService.ErrorMessage))
+                {
+                    <div class="alert alert--error">
+                        <svg viewBox="0 0 16 16" fill="currentColor" width="15"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm-.75 4a.75.75 0 011.5 0v3.5a.75.75 0 01-1.5 0V5zm.75 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                        @DbService.ErrorMessage
+                    </div>
+                }
+
+                <ul class="feature-list">
+                    <li><span class="feat-ok">✓</span> Clients, channels, bans, groups</li>
+                    <li><span class="feat-ok">✓</span> Server properties</li>
+                    <li><span class="feat-ok">✓</span> Group assignments</li>
+                    <li><span class="feat-ok">✓</span> Permissions (Fixed keys)</li>
+                </ul>
+            </div>
+        </div>
+    }
+
+    @* ═══════════════════════════════════════════════ CONVERTING ═══ *@
+    @if (_converting)
+    {
+        <div class="page-center">
+            <div class="card card--narrow">
+                <div class="spinner-wrap">
+                    <div class="spinner"></div>
+                </div>
+                <p class="converting-label">Converting…</p>
+                <p class="converting-sub">Reading TS3 · Creating TS6 schema · Migrating data</p>
+            </div>
+        </div>
+    }
+
+    @* ═══════════════════════════════════════════════ DONE ═══ *@
+    @if (_result is not null)
+    {
+        var url = DownloadUrl(_result.DownloadId!);
+
+        <div class="page-center">
+            <div class="card">
+                @if (_result.Success)
+                {
+                    <div class="success-icon">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <circle cx="24" cy="24" r="22" stroke="var(--green)" stroke-width="1.5" />
+                            <path d="M14 24 L21 31 L34 17" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <h2 class="done-title">Conversion successful!</h2>
+                    <p class="done-sub">@FormatSize(_result.FileSizeBytes) · expires in @FormatTtl(Cache.Ttl)</p>
+
+                    <div class="stats-grid">
+                        <div class="stat"><span class="stat-n">@_result.Stats.Clients</span><span>clients</span></div>
+                        <div class="stat"><span class="stat-n">@_result.Stats.Channels</span><span>channels</span></div>
+                        <div class="stat"><span class="stat-n">@_result.Stats.Bans</span><span>bans</span></div>
+                        <div class="stat"><span class="stat-n">@(_result.Stats.ServerGroups + _result.Stats.ChannelGroups)</span><span>groups</span></div>
+                        <div class="stat"><span class="stat-n">@_result.Stats.GroupAssignments</span><span>assignments</span></div>
+                        <div class="stat"><span class="stat-n">@_result.Stats.Perms</span><span>permissions</span></div>
+                        <div class="stat"><span class="stat-n">@_result.Stats.ServerProperties</span><span>properties</span></div>
+                    </div>
+
+                    <a class="btn-download" href="@url" download="tsserver.sqlitedb">
+                        <svg viewBox="0 0 20 20" fill="currentColor" width="18"><path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" /><path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" /></svg>
+                        Download tsserver.sqlitedb
+                    </a>
+
+                    <div class="cmd-section">
+                        <div class="cmd-block">
+                            <span class="cmd-label">curl</span>
+                            <code class="cmd-code">curl -O "@url"</code>
+                        </div>
+                        <div class="cmd-block">
+                            <span class="cmd-label">wget</span>
+                            <code class="cmd-code">wget "@url"</code>
+                        </div>
+                    </div>
+
+                    @if (_result.Stats.Warnings.Count > 0)
+                    {
+                        <details class="warn-details">
+                            <summary>@_result.Stats.Warnings.Count warning(s)</summary>
+                            <ul class="warn-list">
+                                @foreach (var w in _result.Stats.Warnings)
+                                {
+                                    <li>@w</li>
+                                }
+                            </ul>
+                        </details>
+                    }
+                }
+                else
+                {
+                    <div class="error-icon">✕</div>
+                    <h2 class="done-title">Conversion failed</h2>
+                    <div class="alert alert--error">@_result.Error</div>
+                }
+
+                <button class="btn-reset" @onclick="Reset">
+                    <svg viewBox="0 0 16 16" fill="none" width="14"><path d="M1 8a7 7 0 107-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /><path d="M1 4V8H5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                    Convert another file
+                </button>
+            </div>
+        </div>
+    }
+
+    @* ═══════════════════════════════════════════════ FOOTER GITHUB ═══ *@
+    <footer class="global-footer">
+        <a href="https://github.com/AnthoDingo/ts3to6" target="_blank" rel="noopener noreferrer" class="github-link">
+            <svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.54-.17-3.15-.77-3.15-3.41 0-.76.27-1.38.71-1.87-.07-.18-.31-.89.07-1.85 0 0 .58-.18 1.91.71A6.5 6.5 0 018 3.44c.51.01 1.03.07 1.52.21 1.33-.9 1.91-.71 1.91-.71.39.96.14 1.67.07 1.85.44.49.71 1.11.71 1.87 0 2.65-1.61 3.24-3.16 3.41.25.22.47.65.47 1.32 0 .95-.01 1.72-.01 1.9 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+            </svg>
+            <span>View on GitHub</span>
+        </a>
+    </footer>
+</div>

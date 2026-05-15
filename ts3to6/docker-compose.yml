@@ -1,0 +1,15 @@
+services:
+  ts3-converter:
+    build: .
+    image: ts3-converter:latest
+    container_name: ts3-converter
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Duration (in minutes) before generated tsserver.sqlitedb links expire.
+      # Minimum accepted value: 1
+      RETENTION_MINUTES: 60
+
+      # Uncomment to force HTTP behind a reverse proxy that handles TLS:
+      # ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
