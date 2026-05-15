@@ -1,5 +1,6 @@
 using ts3to6.Components;
 using ts3to6.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace ts3to6
 {
@@ -8,6 +9,14 @@ namespace ts3to6
         public static void Main(string[] args)
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+            // Configure Forwarded Headers to support proxies like Nginx Proxy Manager
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
+            });
 
             // Add services to the container.
             builder.Services.AddControllers();
@@ -23,6 +32,9 @@ namespace ts3to6
 
             var app = builder.Build();
 
+            // Forwarded Headers must be first in the pipeline
+            app.UseForwardedHeaders();
+
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
@@ -31,15 +43,14 @@ namespace ts3to6
                 app.UseHsts();
             }
 
-            //app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection(); // Handled by the reverse proxy
 
             app.UseStaticFiles();
             app.UseAntiforgery();
 
             app.MapControllers();
 
-            //app.MapStaticAssets();
+            app.MapStaticAssets();
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 

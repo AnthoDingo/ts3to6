@@ -12,4 +12,4 @@ services:
       RETENTION_MINUTES: 60
 
       # Uncomment to force HTTP behind a reverse proxy that handles TLS:
-      # ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
