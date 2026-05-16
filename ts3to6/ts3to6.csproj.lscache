@@ -13,19 +13,11 @@ primary
 lastDtbSucceeded
 
 [properties]
-AssemblyName=ts3to6
-CommandLineArgsForDesignTimeEvaluation=-langversion:14.0 -define:TRACE
-CompilerGeneratedFilesOutputPath=
-MaxSupportedLangVersion=14.0
-ProjectAssetsFile=<PATH>obj/project.assets.json
-RootNamespace=ts3to6
-RunAnalyzers=
-RunAnalyzersDuringLiveAnalysis=
-SolutionPath=*Undefined*
-TargetFrameworkIdentifier=.NETCoreApp
-TargetPath=<PATH>bin/Debug/net10.0-windows/ts3to6.dll
-TargetRefPath=<PATH>obj/Debug/net10.0-windows/ref/ts3to6.dll
-TemporaryDependencyNodeTargetIdentifier=net10.0-Windows
+CommandLineArgsForDesignTimeEvaluation=-langversion:13.0 -define:TRACE
+MaxSupportedLangVersion=13.0
+TargetPath=<PATH>bin/Debug/net9.0-windows/ts3to6.dll
+TargetRefPath=<PATH>obj/Debug/net9.0-windows/ref/ts3to6.dll
+TemporaryDependencyNodeTargetIdentifier=net9.0-Windows
 
 [commandLineArguments]
 /noconfig
@@ -36,7 +28,7 @@ TemporaryDependencyNodeTargetIdentifier=net10.0-Windows
 /nostdlib+
 /errorreport:prompt
 /warn:10
-/define:TRACE;DEBUG;NET;NET10_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NET10_0_OR_GREATER;NETCOREAPP1_0_OR_GREATER;NETCOREAPP1_1_OR_GREATER;NETCOREAPP2_0_OR_GREATER;NETCOREAPP2_1_OR_GREATER;NETCOREAPP2_2_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
+/define:TRACE;DEBUG;NET;NET10_0;NETCOREAPP;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NET10_0_OR_GREATER;NETCOREAPP1_0_OR_GREATER;NETCOREAPP1_1_OR_GREATER;NETCOREAPP2_0_OR_GREATER;NETCOREAPP2_1_OR_GREATER;NETCOREAPP2_2_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER
 /highentropyva+
 /nullable:enable
 /features:"InterceptorsNamespaces=;Microsoft.Extensions.Validation.Generated"
@@ -44,8 +36,8 @@ TemporaryDependencyNodeTargetIdentifier=net10.0-Windows
 /debug:portable
 /filealign:512
 /optimize-
-/out:obj\Debug\net10.0-windows\ts3to6.dll
-/refout:obj\Debug\net10.0-windows\refint\ts3to6.dll
+/out:obj\Debug\net10.0\ts3to6.dll
+/refout:obj\Debug\net10.0\refint\ts3to6.dll
 /target:exe
 /warnaserror-
 /utf8output
@@ -118,9 +110,8 @@ Data/Models/Ts6/
 Data/
  Ts3DbContext.cs
  Ts6DbContext.cs
- Ts6DbContextFactory.cs
 Enums/DbVersion.cs
-obj/Debug/net10.0-windows/
+obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
  EmbeddedAttribute.cs
  ts3to6.AssemblyInfo.cs
@@ -451,7 +442,7 @@ Services/
  microsoft.extensions.dependencymodel/10.0.8/lib/net10.0/Microsoft.Extensions.DependencyModel.dll
  sqlitepclraw.bundle_e_sqlite3/2.1.11/lib/netstandard2.0/SQLitePCLRaw.batteries_v2.dll
  sqlitepclraw.core/2.1.11/lib/netstandard2.0/SQLitePCLRaw.core.dll
- sqlitepclraw.provider.e_sqlite3/2.1.11/lib/net6.0-windows7.0/SQLitePCLRaw.provider.e_sqlite3.dll
+ sqlitepclraw.provider.e_sqlite3/2.1.11/lib/net6.0/SQLitePCLRaw.provider.e_sqlite3.dll
 
 [analyzerReferences]
 <DOTNET>/packs/Microsoft.AspNetCore.App.Ref/10.0.8/analyzers/dotnet/cs/
@@ -486,7 +477,7 @@ Services/
 
 [analyzerConfigFiles]
 <DOTNET>/sdk/10.0.300/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_default.globalconfig
-obj/Debug/net10.0-windows/ts3to6.GeneratedMSBuildEditorConfig.editorconfig
+obj/Debug/net10.0/ts3to6.GeneratedMSBuildEditorConfig.editorconfig
 
 [additionalFiles]
 Components/
