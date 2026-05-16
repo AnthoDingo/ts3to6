@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -164,17 +165,40 @@ public sealed class MigrationService
         {
             foreach (Data.Models.Ts3.InstanceProperty instance in ts3.InstanceProperties.AsNoTracking())
             {
+                string value;
+                switch (instance.Ident)
+                {
+                    case "serverinstance_database_version":
+                        // TS3 version 3.13.6 and below used "65" as the database version, but TS6 requires "66"
+                        value = "66";
+                        break;
+                    case "serverinstance_permissions_version":
+                        value = "26";
+                        break;
+                    default:
+                        value = instance.Value;
+                        break;
+                }
                 ts6.InstanceProperties.Add(new Data.Models.Ts6.InstanceProperty
                 {
                     ServerId = instance.ServerId,
                     StringId = instance.StringId,
                     Id = instance.Id,
                     Ident = instance.Ident,
-                    Value = instance.Value,
+                    Value = value,
                 });
                 await ts6.SaveChangesAsync();
                 
             }
+            ts6.InstanceProperties.Add(new Data.Models.Ts6.InstanceProperty
+            {
+                ServerId = 0,
+                StringId = "0",
+                Id = 0,
+                Ident = "serverinstance_max_homebases",
+                Value = "-1",
+            });
+            await ts6.SaveChangesAsync();
         }
         catch (Exception ex) { warn.Add($"Instance Properties: {ex.Message}"); }
         return n;
@@ -273,6 +297,9 @@ public sealed class MigrationService
         {
             foreach(Data.Models.Ts3.ServerProperty prop in ts3.ServerProperties.AsNoTracking())
             {
+                if (prop.Ident == "virtualserver_file_storage_class")
+                    continue;
+
                 ts6.ServerProperties.Add(new Data.Models.Ts6.ServerProperty
                 {
                     ServerId = prop.ServerId,
@@ -282,6 +309,34 @@ public sealed class MigrationService
                 });
                 await ts6.SaveChangesAsync();
                 n++;
+            }
+
+            Dictionary<string, string> defaultProps = new Dictionary<string, string>
+            {
+                { "virtualserver_address", string.Empty },
+                { "virtualserver_storage_quota", "4294967295" },
+                { "virtualserver_webrtc_certificate", string.Empty },
+                { "virtualserver_webrtc_private_key", string.Empty },
+                { "virtualserver_canonical_name", string.Empty },
+                { "virtualserver_mytsid_connect_only", "0" },
+                { "virtualserver_max_homebases", "64" },
+                { "virtualserver_homebase_storage_quota", "4294967295" },
+                { "virtualserver_sfu_endpoint", string.Empty },
+            };
+            foreach (var kvp in defaultProps)
+            {
+                if (!ts6.ServerProperties.Any(p => p.Ident == kvp.Key))
+                {
+                    ts6.ServerProperties.Add(new Data.Models.Ts6.ServerProperty
+                    {
+                        ServerId = 1,
+                        Id = 1,
+                        Ident = kvp.Key,
+                        Value = kvp.Value
+                    });
+                    await ts6.SaveChangesAsync();
+                    n++;
+                }
             }
         }
         catch (Exception ex) { warn.Add($"Server properties: {ex.Message}"); }
@@ -298,7 +353,7 @@ public sealed class MigrationService
                 ts6.Bans.Add(new Data.Models.Ts6.Ban
                 {
                     BanId = ban.BanId,
-                    ServerId = 1, // TS3 had no server_id column, so we assign all bans to server_id=1
+                    ServerId = ban.ServerId,
                     BanIp = ban.BanIp,
                     BanName = ban.BanName,
                     BanUid = ban.BanUid,
@@ -328,7 +383,7 @@ public sealed class MigrationService
                 ts6.GroupsServers.Add(new Data.Models.Ts6.GroupsServer
                 {
                     GroupId = grp.GroupId,
-                    ServerId = 1, // TS3 had no server_id column, so we assign all groups to server_id=1
+                    ServerId = grp.ServerId,
                     Name = grp.Name,
                     Type = grp.Type,
                     OrgGroupId = grp.OrgGroupId
@@ -351,7 +406,7 @@ public sealed class MigrationService
                 ts6.GroupsChannels.Add(new Data.Models.Ts6.GroupsChannel
                 {
                     GroupId = grp.GroupId,
-                    ServerId = 1, // TS3 had no server_id column, so we assign all groups to server_id=1
+                    ServerId = grp.ServerId,
                     Name = grp.Name,
                     Type = grp.Type,
                     OrgGroupId = grp.OrgGroupId
