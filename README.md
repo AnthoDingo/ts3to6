@@ -2,6 +2,8 @@
 
 This project is a web-based tool for converting TeamSpeak 3 SQLite databases to the format compatible with TeamSpeak 6 (Server Release 5).
 
+You can use this hosted version [ts3to6](https://ts3to6.janus.ovh)
+
 ## 🚀 Deployment with Docker
 
 The easiest way to run the application is using Docker.
